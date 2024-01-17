@@ -33,11 +33,9 @@ to_scoringutils_quantile <- function(
   return(data)
 }
 
-
-#' @import checkmate
 validate_inputs <- function(model_output_data, target_data) {
   errors <- list()
-  assert_data_frame(model_output_data)
+  checkmate::assert_data_frame(model_output_data)
   required_cols_output <- c(
     "value", "model_id", "output_type_id", "output_type"
   )
@@ -57,7 +55,6 @@ validate_inputs <- function(model_output_data, target_data) {
     setdiff(names(model_output_data), required_cols_output)
   )
   task_id_cols_target <- sort(setdiff(names(target_data), c("value")))
-
   if(!identical(task_id_cols_output, task_id_cols_target)) {
     errors[["task_id_cols"]] <-
       paste0(
@@ -68,6 +65,7 @@ validate_inputs <- function(model_output_data, target_data) {
   if (length(errors) > 0) {
     stop("Found the following issues: \n", paste(errors, collapse = "\n"))
   }
-  return(invisible(NULL))
+  return(TRUE)
+
 }
 
