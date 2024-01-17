@@ -12,7 +12,6 @@ to_scoringutils_quantile <- function(
     model_output_data,
     target_data
 ) {
-
   ## validate inputs
   # general input checks
   # model_output_data needs to have a column `value`
@@ -35,11 +34,40 @@ to_scoringutils_quantile <- function(
 }
 
 
+#' @import checkmate
+validate_inputs <- function(model_output_data, target_data) {
+  errors <- list()
+  assert_data_frame(model_output_data)
+  required_cols_output <- c(
+    "value", "model_id", "output_type_id", "output_type"
+  )
 
-validate_input <- function() {
+  if (!all(required_cols_output %in% names(model_output_data))) {
+    errors[["model_output"]] <-
+      paste0("model_output_data needs to have the following columns: ",
+             paste(required_cols_output, collapse = ", "))
+  }
 
+  if (!("value" %in% names(target_data))) {
+    errors[["target_date"]] <-
+      paste0("target_data needs to have the following columns: `value`")
+  }
+
+  task_id_cols_output <- sort(
+    setdiff(names(model_output_data), required_cols_output)
+  )
+  task_id_cols_target <- sort(setdiff(names(target_data), c("value")))
+
+  if(!identical(task_id_cols_output, task_id_cols_target)) {
+    errors[["task_id_cols"]] <-
+      paste0(
+        "model_output_data and target_data need to have matching column names."
+      )
+  }
+
+  if (length(errors) > 0) {
+    stop("Found the following issues: \n", paste(errors, collapse = "\n"))
+  }
+  return(invisible(NULL))
 }
 
- |>
-  select(-output_type) |>
-  scoringutils::score()
